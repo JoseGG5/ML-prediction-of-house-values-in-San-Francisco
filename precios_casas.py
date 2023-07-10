@@ -50,8 +50,8 @@ data.info() #Para ver lo que pesa
 #%% EDA
 description = data.describe()
 
-report = ProfileReport(data)
-report.to_file(output_file='output.html')
+# report = ProfileReport(data)
+# report.to_file(output_file='output.html')
 
 nans = pd.isnull(data) 
 conteo = nans.sum() #Hay 207 nans en data en total_bedrooms, vamos a quitarlos (también se podrían rellenar con la media)
@@ -96,7 +96,7 @@ plt.title("Posición de las casas junto con los households y el precio medio")
 
 
 min_lat, max_lat, min_lon, max_lon = min(data.latitude), max(data.latitude), min(data.longitude), max(data.longitude) #Para descargarla de gebco
-ruta_bty = os.path.join(os.getcwd(), 'bty', 'gebco_2023_n41.95_s32.54_w-124.35_e-114.31.asc')
+ruta_bty = os.path.join(os.getcwd(), 'bty', 'gebco_2023_n41.95_s32.54_w-124.35_e-108.31.asc')
 
 
 with open(ruta_bty, 'r') as bty:
@@ -150,10 +150,10 @@ print('El área de batimetría abarca unos {:.2f} km de lado en X, mientras que 
       'en latitud abarca unos {:.2f} km.'.format(ladox, ladoy))
 
 """
-Voy a probar con ~100 m de resolución en un principio
+Voy a probar con ~1000 m de resolución en un principio
 """
 #%% Procesado bty
-dx = dy = 2000     # Distancia en metros de celda
+dx = dy = 500     # Distancia en metros de celda
 nx, ny = int(np.round(ladox*1e3 / dx)), int(np.round(ladoy*1e3 / dy))
 
 # Mallado en lat/lon
@@ -197,14 +197,11 @@ bbound2 = [xleft, ybot, xright, ytop]
 """ Revisar que está pasando con el plot, que no tiene sentido que salgan casas tan lejos
     si el cuadro se ha dibujado con los datos de las casas"""
 
-lati = data.latitude
-long = data.longitude
-coords_utm = utm.from_latlon(np.asarray(lati), np.asarray(long))[:2]
-coords_utm_plot = np.asarray(coords_utm) * 1e-3
+lati, long = data.latitude.values, data.longitude.values
 
-
-coords = np.asarray([data.longitude, data.latitude]).T
-coords_utm = utm.from_latlon(coords[:,1], coords[:,0])[:2]
+coords_utm = [utm.from_latlon(par[0], par[1])[:2] for par in zip(lati, long)] #Hay que hacerlo así iterando, con la serie entera fallaría
+coords_utm = np.asarray(coords_utm)
+coords_utm_plot = coords_utm * 1e-3
 
 savePlot = False
 fig, ax0 = plt.subplots(figsize=(10,10))
@@ -216,13 +213,17 @@ ax0.contour(xgm/1000, ygm/1000, bty_interpolado, [-0.1], linewidths = 1, linesty
 # ax0.scatter(utmsrc[0]*1e-3, utmsrc[1]*1e-3, marker='x', c = 'k', s = 50)
 ax0.set_xlabel(r'$x$ [km]')
 ax0.set_ylabel(r'$y$ [km]')
-ax0.scatter(x=coords_utm_plot[0], y=coords_utm_plot[1])
+# ax0.scatter(x=coords_utm_plot[:,0], y=coords_utm_plot[:,1])
 # ax0.setxlim()
 fig.colorbar(im, label = 'Depth [m]')
 # if savePlot:
 #     savefig(fig, "bty")
 
 
+
+#%%
+fig, ax0 = plt.subplots()
+ax0.scatter(x=coords_utm_plot[:,0], y=coords_utm_plot[:,1])
 
 
 
