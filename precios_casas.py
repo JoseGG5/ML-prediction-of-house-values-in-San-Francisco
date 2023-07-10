@@ -76,6 +76,7 @@ sns.heatmap(matrix, annot=True)
 
 #%% Quito las más correladas y vuelvo a ver la matriz de correlación 
 data.drop(['total_bedrooms', 'total_rooms', 'population', 'median_income'], axis=1, inplace=True)
+data.reset_index(drop=True, inplace=True)
 plt.close()
 data_for_corr = data.iloc[:, :len(data.columns)-1]
 matrix = data_for_corr.corr()
@@ -92,8 +93,6 @@ plt.title("Posición de las casas junto con los households y el precio medio")
 #%%
 """ TODO: Para plots mas chulos y mejor entendimiento podría estar bien conseguir 
     una bty de la zona (POR ENTENDER LA CERCANÍA LA MAR Y LA ALTITUD DE LOS BARRIOS)"""
-
-
 
 
 min_lat, max_lat, min_lon, max_lon = min(data.latitude), max(data.latitude), min(data.longitude), max(data.longitude) #Para descargarla de gebco
