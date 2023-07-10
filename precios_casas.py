@@ -20,6 +20,7 @@ import scienceplots
 import csv
 import utm
 from scipy.interpolate import LinearNDInterpolator, interp2d, RectSphereBivariateSpline, griddata, RectBivariateSpline, interpn, RegularGridInterpolator
+import xarray as xr
 
 plt.style.use('science')
 
@@ -98,7 +99,6 @@ plt.title("Posición de las casas junto con los households y el precio medio")
 min_lat, max_lat, min_lon, max_lon = min(data.latitude), max(data.latitude), min(data.longitude), max(data.longitude) #Para descargarla de gebco
 ruta_bty = os.path.join(os.getcwd(), 'bty', 'gebco_2023_n41.95_s32.54_w-124.35_e-108.31.asc')
 
-
 with open(ruta_bty, 'r') as bty:
     bty_iter = csv.reader(bty, delimiter = ' ')
     bty_data = [data for data in bty_iter]
@@ -150,7 +150,7 @@ print('El área de batimetría abarca unos {:.2f} km de lado en X, mientras que 
       'en latitud abarca unos {:.2f} km.'.format(ladox, ladoy))
 
 """
-Voy a probar con ~1000 m de resolución en un principio
+Voy a probar con ~500 m de resolución en un principio
 """
 #%% Procesado bty
 dx = dy = 500     # Distancia en metros de celda
@@ -206,7 +206,7 @@ coords_utm_plot = coords_utm * 1e-3
 savePlot = False
 fig, ax0 = plt.subplots(figsize=(10,10))
 im = ax0.imshow(bty_interpolado, extent= [xleft/1000, (xright+xdiff)/1000,
-                ybot/1000, (ytop+ydiff)/1000], cmap='rainbow_r',
+                ybot/1000, (ytop+ydiff)/500], cmap='rainbow_r',
                 origin='lower', vmin=0, interpolation='gaussian')
 ax0.contourf(xgm/1000, ygm/1000, bty_interpolado, [-np.inf, -0.1], colors = 'gray')
 ax0.contour(xgm/1000, ygm/1000, bty_interpolado, [-0.1], linewidths = 1, linestyles = 'solid', colors = 'k')
@@ -219,13 +219,10 @@ fig.colorbar(im, label = 'Depth [m]')
 # if savePlot:
 #     savefig(fig, "bty")
 
-
-
 #%%
-fig, ax0 = plt.subplots()
-ax0.scatter(x=coords_utm_plot[:,0], y=coords_utm_plot[:,1])
+root = os.getcwd()
+btys_folder = 'GEBCO_10_Jul_2023_0c0e83e4a836'
+da = xr.open_dataset(os.path.join(root, 'bty', btys_folder,'gebco_2023_n41.95_s32.54_w-124.35_e-108.31.nc'))
 
-
-
-
-
+da.elevation.plot()
+plt.scatter(long, lati, c='black', s=0.5)
