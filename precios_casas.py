@@ -226,12 +226,46 @@ btys_folder = 'GEBCO_10_Jul_2023_0c0e83e4a836'
 da = xr.open_dataset(os.path.join(root, 'bty', btys_folder,'gebco_2023_n41.95_s32.54_w-124.35_e-108.31.nc'))
 
 da.elevation.plot(cmap="jet", figsize=(8,6))
-im = plt.scatter(long, lati, c=data["median_house_value"], s=data["households"]/50, label = "households", alpha=0.1, 
-            cmap="twilight")
-plt.colorbar(im)
+im = plt.scatter(long, lati, c=data["median_house_value"], s=data["households"]/50, label = "households", alpha=0.3, 
+            cmap=plt.cm.get_cmap('twilight'))
+plt.colorbar(label="Median house value")
 
 plt.legend()
 plt.title("Casas con households y bty")
 plt.show()
 savefig(plot_dir, "Relacion_bty_households")
+
+
+#%% Voy a extraer la altimetría para cada punto (casa/barrio)
+""" Al final no lo voy a hacer porque se aprecia que las casas
+    mas caras no se encuentran en zonas de mayor altitud, y, además,
+    todas las casas están en casi el nivel del mar por ser un dataset de una
+    zona costera. Comento y no borro porque me parece interesante como extraer los
+    features de un nc"""
+
+# bty = da.elevation.values #Matríz de shape (len(lat_bty), len(lon_bty))
+# lat_bty = list(da.lat.values)
+# lon_bty = list(da.lon.values)
+# coords_bty = [[par[0], par[1]] for par in zip(lat_bty, lon_bty)]
+# coords_bty = np.asarray(coords_bty)
+
+# lati, long = data.latitude.values, data.longitude.values
+# coords_casas = [[par[0], par[1]] for par in zip(lati, long)]
+# coords_casas = np.asarray(coords_casas)
+
+#%% Histogramas
+
+cont = 0
+nfeatures = len(data.columns)
+fig, ax = plt.subplots(ncols=int(nfeatures/2), nrows=int(nfeatures/2))
+for i in range(int(nfeatures/2)):
+    if i != int((nfeatures/2)-1):
+        ax[i,cont].hist(data[data.columns[i]])
+    else:
+        cont= cont+1
+        
+
+
+
+
 
