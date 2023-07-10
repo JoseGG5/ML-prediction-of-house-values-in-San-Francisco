@@ -25,6 +25,11 @@ import xarray as xr
 plt.style.use('science')
 
 
+#%% Funciones
+
+def savefig(plot_dir, name):
+    plt.savefig(os.path.join(plot_dir, name), bbox_inches="tight", dpi=180)
+
 #%% Data load
 URL = "https://mymldatasets.s3.eu-de.cloud-object-storage.appdomain.cloud/housing.tgz"
 PATH = "housing.tgz"
@@ -60,14 +65,6 @@ conteo = nans.sum() #Hay 207 nans en data en total_bedrooms, vamos a quitarlos (
 idx = [i for i,e in enumerate(nans.total_bedrooms) if e == True] #Obtengo los índices
 data.drop(idx, axis=0, inplace=True)
 
-# Plot para ver 4 variables en un scatter
-data.plot(kind="scatter", x="longitude", y="latitude", alpha=0.4,
-    s=data["population"]/100, label="population", figsize=(10,7),
-    c="median_house_value", cmap=plt.get_cmap("jet"), colorbar=True,
-    sharex=False)
-plt.title('Ubicación de las casas junto con su precio y población')
-plt.legend()
-plt.show()
 
 #%% Matriz de correlacion
 plt.close()
@@ -219,10 +216,22 @@ fig.colorbar(im, label = 'Depth [m]')
 # if savePlot:
 #     savefig(fig, "bty")
 
-#%%
+#%% Plot casas junto a bty (meter también el tamaño de las casas dependiente del precio)
 root = os.getcwd()
+plot_dir = os.path.join(root, 'plots')
+
+plt.close()
+lati, long = data.latitude.values, data.longitude.values
 btys_folder = 'GEBCO_10_Jul_2023_0c0e83e4a836'
 da = xr.open_dataset(os.path.join(root, 'bty', btys_folder,'gebco_2023_n41.95_s32.54_w-124.35_e-108.31.nc'))
 
-da.elevation.plot()
-plt.scatter(long, lati, c='black', s=0.5)
+da.elevation.plot(cmap="jet", figsize=(8,6))
+im = plt.scatter(long, lati, c=data["median_house_value"], s=data["households"]/50, label = "households", alpha=0.1, 
+            cmap="twilight")
+plt.colorbar(im)
+
+plt.legend()
+plt.title("Casas con households y bty")
+plt.show()
+savefig(plot_dir, "Relacion_bty_households")
+
