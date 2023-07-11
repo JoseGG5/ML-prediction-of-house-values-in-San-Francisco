@@ -257,15 +257,15 @@ savefig(plot_dir, "Relacion_bty_households")
 
 cont = 0
 nfeatures = len(data.columns)
-fig, ax = plt.subplots(ncols=int(nfeatures/2), nrows=int(nfeatures/2))
-for i in range(int(nfeatures/2)):
-    if i != int((nfeatures/2)-1):
-        ax[i,cont].hist(data[data.columns[i]])
-    else:
-        cont= cont+1
-        
-
-
-
+fig, ax = plt.subplots(nrows:=int(nfeatures/3), ncols:=int(nfeatures/2), sharey=True)
+for i in range(nrows):
+    for j in range(ncols):
+        ax[i,j].hist(data[data.columns[cont]])
+        ax[i,j].set_title(f"{data.columns[cont]}")
+        ax[i,j].set_ylabel("Counts")
+        ax[i,j].set_xlabel("Values")
+        cont = cont + 1
+fig.suptitle("Histogramas")
+savefig(plot_dir, "Histogramas")
 
 
